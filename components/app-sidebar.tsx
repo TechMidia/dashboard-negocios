@@ -8,12 +8,13 @@ import {
   Inbox,
   Zap,
   DollarSign,
-  Briefcase,
-  Shield,
+  Brain,
+  Bell,
+  Bot,
   Settings,
   LogOut,
   Grip,
-  ChevronRight,
+  Circle,
 } from "lucide-react"
 
 import {
@@ -52,7 +53,7 @@ const navItems = [
     badge: 5,
   },
   {
-    title: "Operação",
+    title: "Operacao",
     url: "/operacao",
     icon: Zap,
   },
@@ -60,23 +61,29 @@ const navItems = [
     title: "Financeiro",
     url: "/financeiro",
     icon: DollarSign,
-    badge: 3,
   },
   {
-    title: "Projetos",
-    url: "/projetos",
-    icon: Briefcase,
-    subItems: [
-      { title: "TechMidia", url: "/projetos/techmedia" },
-      { title: "Don Carmo", url: "/projetos/don-carmo" },
-      { title: "Vida Pessoal", url: "/projetos/vida-pessoal" },
-    ],
+    title: "Memoria",
+    url: "/memoria",
+    icon: Brain,
   },
   {
-    title: "Governança",
-    url: "/governanca",
-    icon: Shield,
+    title: "Alertas",
+    url: "/alertas",
+    icon: Bell,
+    badge: 2,
   },
+  {
+    title: "Agentes",
+    url: "/agentes",
+    icon: Bot,
+  },
+]
+
+const ceoStatus = [
+  { name: "TechMidia", status: "operational", color: "bg-ceo-techmidia" },
+  { name: "Don Carmo", status: "setup", color: "bg-ceo-doncarmo" },
+  { name: "Vida", status: "active", color: "bg-ceo-vida" },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -107,43 +114,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <React.Fragment key={item.title}>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url || (item.subItems?.some(sub => pathname === sub.url))}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                    {item.badge && (
-                      <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                    )}
-                  </SidebarMenuItem>
-                  {item.subItems && (
-                    <SidebarMenu className="ml-4 border-l border-sidebar-border">
-                      {item.subItems.map((subItem) => (
-                        <SidebarMenuItem key={subItem.url}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={pathname === subItem.url}
-                            size="sm"
-                          >
-                            <Link href={subItem.url}>
-                              <ChevronRight className="h-4 w-4" />
-                              <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  {item.badge && (
+                    <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
                   )}
-                </React.Fragment>
+                </SidebarMenuItem>
               ))}
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Status CEOs</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <div className="space-y-2 px-2">
+              {ceoStatus.map((ceo) => (
+                <div
+                  key={ceo.name}
+                  className="flex items-center gap-2 rounded-md bg-sidebar-accent/50 px-2 py-1.5"
+                >
+                  <Circle className={`h-2 w-2 fill-current ${ceo.color} text-transparent`} />
+                  <span className="text-xs font-medium">{ceo.name}</span>
+                  <span className="ml-auto text-[10px] text-muted-foreground capitalize">
+                    {ceo.status}
+                  </span>
+                </div>
+              ))}
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

@@ -1,204 +1,414 @@
-'use client'
+"use client"
 
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
+import { AlertBadge } from "@/components/os/alert-badge"
 import {
-  AlertTriangle,
   CheckCircle2,
+  Circle,
   Clock,
-  AlertCircle,
-  Zap,
-} from 'lucide-react'
+  AlertTriangle,
+  Plus,
+  Filter,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+
+type TaskStatus = "pendente" | "em-progresso" | "bloqueado" | "completo"
+type TaskPriority = "critica" | "alta" | "media" | "baixa"
+type CEO = "techmidia" | "doncarmo" | "vida" | "all"
+
+interface Task {
+  id: number
+  titulo: string
+  descricao?: string
+  status: TaskStatus
+  prioridade: TaskPriority
+  ceo: "techmidia" | "doncarmo" | "vida"
+  prazo?: string
+  tags?: string[]
+}
+
+const ceoColors = {
+  techmidia: "bg-ceo-techmidia",
+  doncarmo: "bg-ceo-doncarmo",
+  vida: "bg-ceo-vida",
+}
+
+const ceoLabels = {
+  techmidia: "TechMidia",
+  doncarmo: "Don Carmo",
+  vida: "Vida",
+}
+
+const statusConfig = {
+  pendente: { icon: Circle, color: "text-muted-foreground", label: "Pendente" },
+  "em-progresso": { icon: Clock, color: "text-alert-info", label: "Em Progresso" },
+  bloqueado: { icon: AlertTriangle, color: "text-alert-critical", label: "Bloqueado" },
+  completo: { icon: CheckCircle2, color: "text-primary", label: "Completo" },
+}
+
+const priorityConfig = {
+  critica: { color: "bg-alert-critical/10 text-alert-critical border-alert-critical/20" },
+  alta: { color: "bg-alert-important/10 text-alert-important border-alert-important/20" },
+  media: { color: "bg-alert-info/10 text-alert-info border-alert-info/20" },
+  baixa: { color: "bg-muted text-muted-foreground border-muted" },
+}
+
+// Mock data
+const tasks: Task[] = [
+  {
+    id: 1,
+    titulo: "Finalizar proposta Cliente X",
+    descricao: "Incluir nova pricing e escopo revisado",
+    status: "em-progresso",
+    prioridade: "alta",
+    ceo: "techmidia",
+    prazo: "Hoje, 18:00",
+    tags: ["vendas", "proposta"],
+  },
+  {
+    id: 2,
+    titulo: "Configurar automacao de emails",
+    status: "pendente",
+    prioridade: "media",
+    ceo: "techmidia",
+    prazo: "Amanha",
+    tags: ["automacao"],
+  },
+  {
+    id: 3,
+    titulo: "Criar landing page Don Carmo",
+    descricao: "Design aprovado, iniciar desenvolvimento",
+    status: "pendente",
+    prioridade: "alta",
+    ceo: "doncarmo",
+    prazo: "Sexta-feira",
+    tags: ["desenvolvimento"],
+  },
+  {
+    id: 4,
+    titulo: "Setup de CRM",
+    status: "em-progresso",
+    prioridade: "media",
+    ceo: "doncarmo",
+    prazo: "Esta semana",
+    tags: ["setup", "crm"],
+  },
+  {
+    id: 5,
+    titulo: "Agendar checkup medico",
+    status: "pendente",
+    prioridade: "media",
+    ceo: "vida",
+    prazo: "Esta semana",
+    tags: ["saude"],
+  },
+  {
+    id: 6,
+    titulo: "Estudar modulo 3 do curso",
+    descricao: "React avancado - Server Components",
+    status: "em-progresso",
+    prioridade: "media",
+    ceo: "vida",
+    prazo: "Hoje",
+    tags: ["estudos"],
+  },
+  {
+    id: 7,
+    titulo: "Revisar contrato de servico",
+    status: "bloqueado",
+    prioridade: "critica",
+    ceo: "techmidia",
+    prazo: "Ontem",
+    tags: ["juridico", "urgente"],
+  },
+  {
+    id: 8,
+    titulo: "Organizar documentos pessoais",
+    status: "completo",
+    prioridade: "baixa",
+    ceo: "vida",
+    tags: ["organizacao"],
+  },
+]
 
 export default function OperacaoPage() {
-  const operacoes = [
-    {
-      id: 1,
-      titulo: 'Deploy Sistema Principal',
-      status: 'em-progresso',
-      prioridade: 'alta',
-      tempo: '2h 34m',
-      responsavel: 'Carlos M.',
-      descricao: 'Atualização do core do sistema em produção',
-    },
-    {
-      id: 2,
-      titulo: 'Sincronização de Dados',
-      status: 'concluida',
-      prioridade: 'media',
-      tempo: '45m',
-      responsavel: 'Ana Silva',
-      descricao: 'Sincronização de banco de dados com backup',
-    },
-    {
-      id: 3,
-      titulo: 'Investigação de Anomalia',
-      status: 'em-andamento',
-      prioridade: 'critica',
-      tempo: '3h 12m',
-      responsavel: 'Roberto F.',
-      descricao: 'Investigação de pico de uso de memória',
-    },
-    {
-      id: 4,
-      titulo: 'Backup Incremental',
-      status: 'agendada',
-      prioridade: 'media',
-      tempo: 'Começar em 1h',
-      responsavel: 'Sistema Automatizado',
-      descricao: 'Backup incremental diário dos servidores',
-    },
-    {
-      id: 5,
-      titulo: 'Recuperação de Falha',
-      status: 'em-andamento',
-      prioridade: 'alta',
-      tempo: '1h 15m',
-      responsavel: 'Time de Infraestrutura',
-      descricao: 'Recuperação de falha em servidor secundário',
-    },
-  ]
+  const [selectedCEO, setSelectedCEO] = useState<CEO>("all")
+  const [completedTasks, setCompletedTasks] = useState<number[]>([8])
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'concluida':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case 'em-progresso':
-      case 'em-andamento':
-        return <Zap className="h-5 w-5 text-blue-500 animate-pulse" />
-      case 'critica':
-        return <AlertTriangle className="h-5 w-5 text-red-500" />
-      case 'agendada':
-        return <Clock className="h-5 w-5 text-yellow-500" />
-      default:
-        return <AlertCircle className="h-5 w-5 text-gray-500" />
-    }
+  const filteredTasks = selectedCEO === "all" 
+    ? tasks 
+    : tasks.filter(t => t.ceo === selectedCEO)
+
+  const tasksByStatus = {
+    pendente: filteredTasks.filter(t => t.status === "pendente"),
+    "em-progresso": filteredTasks.filter(t => t.status === "em-progresso"),
+    bloqueado: filteredTasks.filter(t => t.status === "bloqueado"),
+    completo: filteredTasks.filter(t => t.status === "completo"),
   }
 
-  const getPrioridadeColor = (prioridade: string) => {
-    switch (prioridade) {
-      case 'critica':
-        return 'bg-red-500/10 text-red-500'
-      case 'alta':
-        return 'bg-orange-500/10 text-orange-500'
-      case 'media':
-        return 'bg-yellow-500/10 text-yellow-500'
-      default:
-        return 'bg-gray-500/10 text-gray-500'
-    }
+  const toggleComplete = (taskId: number) => {
+    setCompletedTasks(prev => 
+      prev.includes(taskId) 
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId]
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Operação do Dia</h1>
-        <p className="text-muted-foreground">
-          Monitore todas as operações críticas e processos em tempo real
-        </p>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+            Operacao do Dia
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie tarefas por CEO e acompanhe o progresso
+          </p>
+        </div>
+        <Button className="gap-2">
+          <Plus className="h-4 w-4" />
+          Nova Tarefa
+        </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-card/50 backdrop-blur-xl border-white/5 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Em Andamento</p>
-              <p className="text-2xl font-bold">3</p>
-            </div>
-            <Zap className="h-8 w-8 text-blue-500/50" />
-          </div>
-        </Card>
-
-        <Card className="bg-card/50 backdrop-blur-xl border-white/5 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Concluídas</p>
-              <p className="text-2xl font-bold">8</p>
-            </div>
-            <CheckCircle2 className="h-8 w-8 text-green-500/50" />
-          </div>
-        </Card>
-
-        <Card className="bg-card/50 backdrop-blur-xl border-white/5 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Críticas</p>
-              <p className="text-2xl font-bold">1</p>
-            </div>
-            <AlertTriangle className="h-8 w-8 text-red-500/50" />
-          </div>
-        </Card>
-
-        <Card className="bg-card/50 backdrop-blur-xl border-white/5 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Tempo Total</p>
-              <p className="text-2xl font-bold">10h 38m</p>
-            </div>
-            <Clock className="h-8 w-8 text-yellow-500/50" />
-          </div>
-        </Card>
-      </div>
-
-      <Card className="bg-card/50 backdrop-blur-xl border-white/5">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold mb-6">Operações Ativas</h2>
-
-          <div className="space-y-4">
-            {operacoes.map((op) => (
-              <div
-                key={op.id}
-                className="flex items-start justify-between p-4 rounded-lg border border-white/5 bg-black/20 hover:bg-white/5 transition-colors"
-              >
-                <div className="flex gap-4 flex-1">
-                  <div className="mt-1">
-                    {getStatusIcon(op.status)}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <p className="font-semibold text-foreground">{op.titulo}</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {op.descricao}
-                        </p>
-                      </div>
-                      <Badge className={getPrioridadeColor(op.prioridade)}>
-                        {op.prioridade.charAt(0).toUpperCase() + op.prioridade.slice(1)}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Responsável</p>
-                        <p className="text-foreground">{op.responsavel}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Tempo</p>
-                        <p className="text-foreground">{op.tempo}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Status</p>
-                        <p className="text-foreground capitalize">
-                          {op.status.replace('-', ' ')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-4 flex-shrink-0"
-                >
-                  Detalhes
-                </Button>
+      {/* Stats */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Pendentes</p>
+                <p className="text-2xl font-bold">{tasksByStatus.pendente.length}</p>
               </div>
-            ))}
+              <Circle className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Em Progresso</p>
+                <p className="text-2xl font-bold">{tasksByStatus["em-progresso"].length}</p>
+              </div>
+              <Clock className="h-8 w-8 text-alert-info/50" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Bloqueadas</p>
+                <p className="text-2xl font-bold">{tasksByStatus.bloqueado.length}</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-alert-critical/50" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Completas</p>
+                <p className="text-2xl font-bold">{tasksByStatus.completo.length}</p>
+              </div>
+              <CheckCircle2 className="h-8 w-8 text-primary/50" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabs por CEO */}
+      <Tabs value={selectedCEO} onValueChange={(v) => setSelectedCEO(v as CEO)}>
+        <div className="flex items-center justify-between">
+          <TabsList className="bg-card/50">
+            <TabsTrigger value="all">Todos</TabsTrigger>
+            <TabsTrigger value="techmidia" className="gap-2">
+              <div className="h-2 w-2 rounded-full bg-ceo-techmidia" />
+              TechMidia
+            </TabsTrigger>
+            <TabsTrigger value="doncarmo" className="gap-2">
+              <div className="h-2 w-2 rounded-full bg-ceo-doncarmo" />
+              Don Carmo
+            </TabsTrigger>
+            <TabsTrigger value="vida" className="gap-2">
+              <div className="h-2 w-2 rounded-full bg-ceo-vida" />
+              Vida
+            </TabsTrigger>
+          </TabsList>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filtros
+          </Button>
+        </div>
+
+        <TabsContent value={selectedCEO} className="mt-6">
+          <div className="grid gap-6 lg:grid-cols-4">
+            {/* Coluna Pendente */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Circle className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-semibold">Pendente</h3>
+                <Badge variant="secondary" className="ml-auto">
+                  {tasksByStatus.pendente.length}
+                </Badge>
+              </div>
+              <div className="space-y-3">
+                {tasksByStatus.pendente.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    isCompleted={completedTasks.includes(task.id)}
+                    onToggle={() => toggleComplete(task.id)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Coluna Em Progresso */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-alert-info" />
+                <h3 className="font-semibold">Em Progresso</h3>
+                <Badge variant="secondary" className="ml-auto">
+                  {tasksByStatus["em-progresso"].length}
+                </Badge>
+              </div>
+              <div className="space-y-3">
+                {tasksByStatus["em-progresso"].map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    isCompleted={completedTasks.includes(task.id)}
+                    onToggle={() => toggleComplete(task.id)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Coluna Bloqueado */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-alert-critical" />
+                <h3 className="font-semibold">Bloqueado</h3>
+                <Badge variant="secondary" className="ml-auto">
+                  {tasksByStatus.bloqueado.length}
+                </Badge>
+              </div>
+              <div className="space-y-3">
+                {tasksByStatus.bloqueado.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    isCompleted={completedTasks.includes(task.id)}
+                    onToggle={() => toggleComplete(task.id)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Coluna Completo */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold">Completo</h3>
+                <Badge variant="secondary" className="ml-auto">
+                  {tasksByStatus.completo.length}
+                </Badge>
+              </div>
+              <div className="space-y-3">
+                {tasksByStatus.completo.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    isCompleted={true}
+                    onToggle={() => toggleComplete(task.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+function TaskCard({
+  task,
+  isCompleted,
+  onToggle,
+}: {
+  task: Task
+  isCompleted: boolean
+  onToggle: () => void
+}) {
+  return (
+    <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
+      <CardContent className="p-3">
+        <div className="flex gap-3">
+          <Checkbox
+            checked={isCompleted}
+            onCheckedChange={onToggle}
+            className="mt-0.5"
+          />
+          <div className="flex-1 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <p
+                className={cn(
+                  "text-sm font-medium",
+                  isCompleted && "line-through text-muted-foreground"
+                )}
+              >
+                {task.titulo}
+              </p>
+              <Badge
+                variant="outline"
+                className={cn("text-[10px]", priorityConfig[task.prioridade].color)}
+              >
+                {task.prioridade}
+              </Badge>
+            </div>
+            {task.descricao && (
+              <p className="text-xs text-muted-foreground">{task.descricao}</p>
+            )}
+            <div className="flex items-center justify-between">
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium text-background",
+                  ceoColors[task.ceo]
+                )}
+              >
+                {ceoLabels[task.ceo]}
+              </span>
+              {task.prazo && (
+                <span className="text-[10px] text-muted-foreground">
+                  {task.prazo}
+                </span>
+              )}
+            </div>
+            {task.tags && (
+              <div className="flex flex-wrap gap-1">
+                {task.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
