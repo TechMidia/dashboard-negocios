@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   Inbox,
-  Calendar,
-  CheckSquare,
-  Target,
-  Users,
+  Zap,
+  DollarSign,
+  Briefcase,
+  Shield,
   Settings,
   LogOut,
   Grip,
+  ChevronRight,
 } from "lucide-react"
 
 import {
@@ -51,25 +52,30 @@ const navItems = [
     badge: 5,
   },
   {
-    title: "Agenda",
-    url: "/agenda",
-    icon: Calendar,
+    title: "Operação",
+    url: "/operacao",
+    icon: Zap,
   },
   {
-    title: "Tarefas",
-    url: "/tarefas",
-    icon: CheckSquare,
-    badge: 12,
+    title: "Financeiro",
+    url: "/financeiro",
+    icon: DollarSign,
+    badge: 3,
   },
   {
-    title: "Metas",
-    url: "/metas",
-    icon: Target,
+    title: "Projetos",
+    url: "/projetos",
+    icon: Briefcase,
+    subItems: [
+      { title: "TechMidia", url: "/projetos/techmedia" },
+      { title: "Don Carmo", url: "/projetos/don-carmo" },
+      { title: "Vida Pessoal", url: "/projetos/vida-pessoal" },
+    ],
   },
   {
-    title: "Squad",
-    url: "/squad",
-    icon: Users,
+    title: "Governança",
+    url: "/governanca",
+    icon: Shield,
   },
 ]
 
@@ -101,21 +107,41 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                  {item.badge && (
-                    <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                <React.Fragment key={item.title}>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url || (item.subItems?.some(sub => pathname === sub.url))}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                    {item.badge && (
+                      <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                    )}
+                  </SidebarMenuItem>
+                  {item.subItems && (
+                    <SidebarMenu className="ml-4 border-l border-sidebar-border">
+                      {item.subItems.map((subItem) => (
+                        <SidebarMenuItem key={subItem.url}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={pathname === subItem.url}
+                            size="sm"
+                          >
+                            <Link href={subItem.url}>
+                              <ChevronRight className="h-4 w-4" />
+                              <span>{subItem.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
                   )}
-                </SidebarMenuItem>
+                </React.Fragment>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
