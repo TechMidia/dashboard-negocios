@@ -33,3 +33,32 @@ To learn more, take a look at the following resources:
 - [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
 
 <a href="https://v0.app/chat/api/kiro/clone/TechMidia/dashboard-negocios" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+
+## Deploy com Docker (EasyPanel)
+
+Este projeto agora inclui um `Dockerfile` multi-stage pronto para produção no EasyPanel.
+
+### Build local
+
+```bash
+docker build -t dashboard-negocios .
+```
+
+### Run local
+
+```bash
+docker run --rm -p 3000:3000 -e PORT=3000 dashboard-negocios
+```
+
+A aplicação sobe em `http://localhost:3000`.
+
+### Configuração no EasyPanel
+
+- **Source**: repositório Git
+- **Build type**: Dockerfile
+- **Porta do serviço**: `3000`
+- **Variáveis opcionais**:
+  - `NODE_ENV=production`
+  - `NEXT_TELEMETRY_DISABLED=1`
+
+O container já inicia com usuário não-root e usa build standalone do Next.js para reduzir tamanho de imagem e tempo de boot.
