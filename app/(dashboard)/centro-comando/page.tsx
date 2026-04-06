@@ -7,6 +7,7 @@ import { AlertBadge } from "@/components/os/alert-badge"
 import { MetricCard } from "@/components/os/metric-card"
 import { TimelineItem } from "@/components/os/timeline-item"
 import { StatusIndicator } from "@/components/os/status-indicator"
+import { JarvisCoordinator } from "@/components/os/jarvis-coordinator"
 import {
   DollarSign,
   TrendingUp,
@@ -17,13 +18,6 @@ import {
   FileText,
 } from "lucide-react"
 import Link from "next/link"
-
-function getGreeting() {
-  const hour = new Date().getHours()
-  if (hour < 12) return "Bom dia"
-  if (hour < 18) return "Boa tarde"
-  return "Boa noite"
-}
 
 // Mock data - in production, this would come from API/database
 const ceosData = [
@@ -121,29 +115,31 @@ const todayTimeline = [
 ]
 
 export default function CentroComandoPage() {
-  const greeting = getGreeting()
-
   return (
     <div className="space-y-8">
       {/* Header com status do sistema */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-            {greeting}, Operador
+            Bem-vindo, Operador
           </h1>
           <p className="text-muted-foreground">
             Visao geral do seu sistema operacional pessoal.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-card/50 px-3 py-2 backdrop-blur-xl">
-            <StatusIndicator status="online" label="Jarvis" />
-          </div>
-          <span className="text-xs text-muted-foreground">
-            Ultima sync: agora
-          </span>
-        </div>
+        <span className="text-xs text-muted-foreground">
+          Ultima sync: agora
+        </span>
       </div>
+
+      {/* Jarvis Coordinator - Centro Nevralgico */}
+      <section>
+        <JarvisCoordinator
+          status="coordinating"
+          pendingDecisions={3}
+          coordinating={["TechMidia", "Don Carmo", "Vida Pessoal"]}
+        />
+      </section>
 
       {/* Cards dos CEOs */}
       <section>

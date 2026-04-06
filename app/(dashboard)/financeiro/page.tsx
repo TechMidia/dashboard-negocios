@@ -16,6 +16,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts"
 import {
   TrendingUp,
@@ -28,10 +31,10 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type CEO = "techmidia" | "doncarmo" | "vida" | "all"
+type CEO = "techmidia" | "doncarmo" | "vida"
 
 interface FinanceData {
-  ceo: "techmidia" | "doncarmo" | "vida"
+  ceo: CEO
   receita: number
   despesa: number
   aReceber: number
@@ -46,170 +49,189 @@ interface Conta {
   tipo: "receber" | "pagar"
   status: "pendente" | "pago" | "vencido"
   vencimento: string
-  ceo: "techmidia" | "doncarmo" | "vida"
+  ceo: CEO
 }
 
-const ceoColors = {
-  techmidia: { bg: "bg-ceo-techmidia", text: "text-ceo-techmidia" },
-  doncarmo: { bg: "bg-ceo-doncarmo", text: "text-ceo-doncarmo" },
-  vida: { bg: "bg-ceo-vida", text: "text-ceo-vida" },
+const ceoConfig = {
+  techmidia: {
+    name: "TechMidia",
+    bg: "bg-ceo-techmidia",
+    text: "text-ceo-techmidia",
+    light: "bg-ceo-techmidia/10",
+  },
+  doncarmo: {
+    name: "Don Carmo",
+    bg: "bg-ceo-doncarmo",
+    text: "text-ceo-doncarmo",
+    light: "bg-ceo-doncarmo/10",
+  },
+  vida: {
+    name: "Vida Pessoal",
+    bg: "bg-ceo-vida",
+    text: "text-ceo-vida",
+    light: "bg-ceo-vida/10",
+  },
 }
 
-const ceoLabels = {
-  techmidia: "TechMidia",
-  doncarmo: "Don Carmo",
-  vida: "Vida Pessoal",
-}
-
-// Mock data
-const financeByDomain: FinanceData[] = [
+// Mock data financeiro por CEO
+const financeDataByCEO: FinanceData[] = [
   {
     ceo: "techmidia",
     receita: 12500,
-    despesa: 4200,
+    despesa: 3200,
     aReceber: 8500,
-    aPagar: 2100,
-    saldo: 8300,
+    aPagar: 1200,
+    saldo: 16600,
   },
   {
     ceo: "doncarmo",
-    receita: 0,
-    despesa: 1800,
-    aReceber: 0,
-    aPagar: 3500,
-    saldo: -1800,
+    receita: 4200,
+    despesa: 2100,
+    aReceber: 3500,
+    aPagar: 800,
+    saldo: 4800,
   },
   {
     ceo: "vida",
-    receita: 6000,
-    despesa: 1200,
+    receita: 1800,
+    despesa: 1500,
     aReceber: 0,
-    aPagar: 800,
-    saldo: 5000,
+    aPagar: 200,
+    saldo: 3100,
   },
 ]
 
-const fluxoCaixa = [
-  { mes: "Jan", techmidia: 8000, doncarmo: -500, vida: 4500 },
-  { mes: "Fev", techmidia: 9500, doncarmo: -800, vida: 4800 },
-  { mes: "Mar", techmidia: 7800, doncarmo: -1200, vida: 5000 },
-  { mes: "Abr", techmidia: 11000, doncarmo: -1500, vida: 4200 },
-  { mes: "Mai", techmidia: 10500, doncarmo: -1800, vida: 5200 },
-  { mes: "Jun", techmidia: 12500, doncarmo: -1800, vida: 6000 },
+// Dados para graficos
+const monthlyChartData = [
+  { mes: "Jan", techmidia: 8000, doncarmo: 2000, vida: 1200 },
+  { mes: "Fev", techmidia: 9500, doncarmo: 2500, vida: 1400 },
+  { mes: "Mar", techmidia: 11000, doncarmo: 3500, vida: 1600 },
+  { mes: "Abr", techmidia: 12500, doncarmo: 4200, vida: 1800 },
 ]
 
 const contas: Conta[] = [
   {
     id: 1,
-    descricao: "Cliente X - Projeto Web",
-    valor: 5000,
+    descricao: "Cliente ABC - Proposta Abril",
+    valor: 5500,
     tipo: "receber",
     status: "pendente",
-    vencimento: "2024-06-20",
+    vencimento: "2026-04-10",
     ceo: "techmidia",
   },
   {
     id: 2,
-    descricao: "Cliente Y - Manutencao",
-    valor: 3500,
+    descricao: "Cliente XYZ - Servicos Prestados",
+    valor: 3000,
     tipo: "receber",
-    status: "vencido",
-    vencimento: "2024-06-10",
+    status: "pago",
+    vencimento: "2026-04-01",
     ceo: "techmidia",
   },
   {
     id: 3,
-    descricao: "Servidor AWS",
-    valor: 450,
+    descricao: "Fornecedor - Materias Primas",
+    valor: 1200,
     tipo: "pagar",
-    status: "pendente",
-    vencimento: "2024-06-15",
-    ceo: "techmidia",
+    status: "vencido",
+    vencimento: "2026-04-05",
+    ceo: "doncarmo",
   },
   {
     id: 4,
-    descricao: "Dominio e Hospedagem",
-    valor: 1200,
+    descricao: "Provedor Internet - Mensal",
+    valor: 450,
     tipo: "pagar",
     status: "pendente",
-    vencimento: "2024-06-25",
-    ceo: "doncarmo",
+    vencimento: "2026-04-15",
+    ceo: "techmidia",
   },
   {
     id: 5,
-    descricao: "Software Contabilidade",
-    valor: 350,
+    descricao: "Salao - Servicos",
+    valor: 150,
     tipo: "pagar",
     status: "pago",
-    vencimento: "2024-06-05",
-    ceo: "doncarmo",
+    vencimento: "2026-04-03",
+    ceo: "vida",
   },
   {
     id: 6,
-    descricao: "Aluguel",
-    valor: 800,
-    tipo: "pagar",
+    descricao: "Parceria comercial",
+    valor: 2000,
+    tipo: "receber",
     status: "pendente",
-    vencimento: "2024-06-10",
-    ceo: "vida",
+    vencimento: "2026-04-20",
+    ceo: "doncarmo",
   },
 ]
 
-const statusColors = {
-  pendente: "bg-alert-important/10 text-alert-important border-alert-important/20",
-  pago: "bg-primary/10 text-primary border-primary/20",
-  vencido: "bg-alert-critical/10 text-alert-critical border-alert-critical/20",
+function getStatusColor(status: string) {
+  switch (status) {
+    case "pago":
+      return "bg-primary/10 text-primary"
+    case "pendente":
+      return "bg-alert-important/10 text-alert-important"
+    case "vencido":
+      return "bg-alert-critical/10 text-alert-critical"
+    default:
+      return "bg-muted text-muted-foreground"
+  }
+}
+
+interface ConsolidadoMetrics {
+  totalReceita: number
+  totalDespesa: number
+  totalSaldo: number
+  aReceber: number
+  aPagar: number
+}
+
+function calculateConsolidado(): ConsolidadoMetrics {
+  return financeDataByCEO.reduce(
+    (acc, data) => ({
+      totalReceita: acc.totalReceita + data.receita,
+      totalDespesa: acc.totalDespesa + data.despesa,
+      totalSaldo: acc.totalSaldo + data.saldo,
+      aReceber: acc.aReceber + data.aReceber,
+      aPagar: acc.aPagar + data.aPagar,
+    }),
+    { totalReceita: 0, totalDespesa: 0, totalSaldo: 0, aReceber: 0, aPagar: 0 }
+  )
 }
 
 export default function FinanceiroPage() {
-  const [selectedCEO, setSelectedCEO] = useState<CEO>("all")
-
-  const totals = financeByDomain.reduce(
-    (acc, d) => ({
-      receita: acc.receita + d.receita,
-      despesa: acc.despesa + d.despesa,
-      aReceber: acc.aReceber + d.aReceber,
-      aPagar: acc.aPagar + d.aPagar,
-      saldo: acc.saldo + d.saldo,
-    }),
-    { receita: 0, despesa: 0, aReceber: 0, aPagar: 0, saldo: 0 }
-  )
-
-  const filteredContas =
-    selectedCEO === "all"
-      ? contas
-      : contas.filter((c) => c.ceo === selectedCEO)
-
-  const contasAReceber = filteredContas.filter((c) => c.tipo === "receber")
-  const contasAPagar = filteredContas.filter((c) => c.tipo === "pagar")
+  const consolidado = calculateConsolidado()
+  const [selectedCEO, setSelectedCEO] = useState<CEO | "all">("all")
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl flex items-center gap-2">
+            <DollarSign className="h-6 w-6 text-primary" />
             Financeiro
           </h1>
           <p className="text-muted-foreground">
-            Visao consolidada e por dominio de receitas, despesas e fluxo de caixa
+            Visao consolidada e detalhes por dominio.
           </p>
         </div>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
-          Nova Transacao
+          Adicionar Conta
         </Button>
       </div>
 
-      {/* Totais Consolidados */}
+      {/* Visao Consolidada */}
       <section>
         <h2 className="mb-4 text-lg font-semibold tracking-tight">
-          Consolidado do Mes
+          Visao Consolidada
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <MetricCard
             label="Receita Total"
-            value={`R$${(totals.receita / 1000).toFixed(1)}k`}
+            value={`R$${(consolidado.totalReceita / 1000).toFixed(1)}k`}
             icon={TrendingUp}
             trend="up"
             trendValue="+12%"
@@ -217,227 +239,326 @@ export default function FinanceiroPage() {
           />
           <MetricCard
             label="Despesa Total"
-            value={`R$${(totals.despesa / 1000).toFixed(1)}k`}
+            value={`R$${(consolidado.totalDespesa / 1000).toFixed(1)}k`}
             icon={TrendingDown}
             trend="down"
             trendValue="-5%"
             colorClass="text-alert-critical"
           />
           <MetricCard
-            label="A Receber"
-            value={`R$${(totals.aReceber / 1000).toFixed(1)}k`}
-            icon={ArrowUpRight}
-            colorClass="text-alert-info"
-          />
-          <MetricCard
-            label="A Pagar"
-            value={`R$${(totals.aPagar / 1000).toFixed(1)}k`}
-            icon={ArrowDownRight}
-            colorClass="text-alert-important"
-          />
-          <MetricCard
-            label="Saldo Liquido"
-            value={`R$${(totals.saldo / 1000).toFixed(1)}k`}
+            label="Saldo Total"
+            value={`R$${(consolidado.totalSaldo / 1000).toFixed(1)}k`}
             icon={DollarSign}
             trend="up"
             trendValue="+8%"
             colorClass="text-primary"
           />
+          <MetricCard
+            label="A Receber"
+            value={`R$${(consolidado.aReceber / 1000).toFixed(1)}k`}
+            icon={ArrowUpRight}
+            trend="up"
+            trendValue="+3 contas"
+            colorClass="text-alert-info"
+          />
+          <MetricCard
+            label="A Pagar"
+            value={`R$${(consolidado.aPagar / 1000).toFixed(1)}k`}
+            icon={ArrowDownRight}
+            trend="down"
+            trendValue="+1 vencido"
+            colorClass="text-alert-critical"
+          />
         </div>
       </section>
 
-      {/* Cards por Dominio */}
-      <section>
-        <h2 className="mb-4 text-lg font-semibold tracking-tight">
-          Por Dominio
-        </h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {financeByDomain.map((domain) => (
-            <Card
-              key={domain.ceo}
-              className="relative overflow-hidden border-white/5 bg-card/50 backdrop-blur-xl"
+      {/* Graficos */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        {/* Receita por Dominio */}
+        <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-base">Receita Mensal</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlyChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="mes" stroke="rgba(255,255,255,0.5)" />
+                <YAxis stroke="rgba(255,255,255,0.5)" />
+                <Tooltip />
+                <Bar dataKey="techmidia" fill="var(--color-ceo-techmidia)" />
+                <Bar dataKey="doncarmo" fill="var(--color-ceo-doncarmo)" />
+                <Bar dataKey="vida" fill="var(--color-ceo-vida)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Distribuicao por Dominio */}
+        <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-base">Saldo por Dominio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={financeDataByCEO.map((d) => ({
+                    name: ceoConfig[d.ceo].name,
+                    value: d.saldo,
+                  }))}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: R$${(value / 1000).toFixed(1)}k`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  <Cell fill="var(--color-ceo-techmidia)" />
+                  <Cell fill="var(--color-ceo-doncarmo)" />
+                  <Cell fill="var(--color-ceo-vida)" />
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Paineis por Dominio */}
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="w-full justify-start bg-card/50 backdrop-blur-xl border-b border-white/5">
+          <TabsTrigger value="all" onClick={() => setSelectedCEO("all")}>
+            Todos os Dominios
+          </TabsTrigger>
+          {(Object.keys(ceoConfig) as CEO[]).map((ceo) => (
+            <TabsTrigger
+              key={ceo}
+              value={ceo}
+              onClick={() => setSelectedCEO(ceo)}
+              className={cn("capitalize")}
             >
-              <div className={cn("absolute inset-x-0 top-0 h-1", ceoColors[domain.ceo].bg)} />
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <div className={cn("h-2 w-2 rounded-full", ceoColors[domain.ceo].bg)} />
-                  {ceoLabels[domain.ceo]}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Receita</p>
-                    <p className="text-lg font-bold text-primary">
-                      R${domain.receita.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Despesa</p>
-                    <p className="text-lg font-bold text-alert-critical">
-                      R${domain.despesa.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="border-t border-white/5 pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Saldo</span>
-                    <span
-                      className={cn(
-                        "text-lg font-bold",
-                        domain.saldo >= 0 ? "text-primary" : "text-alert-critical"
-                      )}
-                    >
-                      R${domain.saldo.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              {ceoConfig[ceo].name}
+            </TabsTrigger>
           ))}
-        </div>
-      </section>
+        </TabsList>
 
-      {/* Grafico Fluxo de Caixa */}
-      <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle>Fluxo de Caixa por Dominio</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={fluxoCaixa}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="mes" stroke="rgba(255,255,255,0.5)" />
-              <YAxis stroke="rgba(255,255,255,0.5)" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(0,0,0,0.9)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "8px",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="techmidia"
-                name="TechMidia"
-                stroke="var(--color-ceo-techmidia)"
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="doncarmo"
-                name="Don Carmo"
-                stroke="var(--color-ceo-doncarmo)"
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="vida"
-                name="Vida"
-                stroke="var(--color-ceo-vida)"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+        {/* Todos */}
+        <TabsContent value="all" className="space-y-6">
+          {(Object.keys(ceoConfig) as CEO[]).map((ceo) => {
+            const data = financeDataByCEO.find((d) => d.ceo === ceo)!
+            const ceConfig = ceoConfig[ceo]
+            const contasCEO = contas.filter((c) => c.ceo === ceo)
+            const aReceber = contasCEO.filter((c) => c.tipo === "receber")
+            const aPagar = contasCEO.filter((c) => c.tipo === "pagar")
 
-      {/* Contas - Tabs */}
-      <Tabs value={selectedCEO} onValueChange={(v) => setSelectedCEO(v as CEO)}>
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold tracking-tight">
-            Contas
-          </h2>
-          <TabsList className="bg-card/50">
-            <TabsTrigger value="all">Todos</TabsTrigger>
-            <TabsTrigger value="techmidia">TechMidia</TabsTrigger>
-            <TabsTrigger value="doncarmo">Don Carmo</TabsTrigger>
-            <TabsTrigger value="vida">Vida</TabsTrigger>
-          </TabsList>
-        </div>
+            return (
+              <section key={ceo} className="space-y-4 p-4 rounded-lg border border-white/5 bg-card/30 backdrop-blur-xl">
+                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                  <div className={cn("h-3 w-3 rounded-full", ceConfig.bg)}></div>
+                  <h3 className="text-lg font-semibold tracking-tight">
+                    {ceConfig.name}
+                  </h3>
+                </div>
 
-        <TabsContent value={selectedCEO} className="mt-4">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* A Receber */}
-            <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <ArrowUpRight className="h-4 w-4 text-primary" />
-                  A Receber
-                  <Badge variant="secondary" className="ml-auto">
-                    {contasAReceber.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {contasAReceber.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    Nenhuma conta a receber
-                  </p>
-                ) : (
-                  contasAReceber.map((conta) => (
-                    <ContaItem key={conta.id} conta={conta} />
-                  ))
+                {/* Metricas do Dominio */}
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="rounded-lg bg-card/50 p-3">
+                    <span className="text-xs text-muted-foreground">Receita</span>
+                    <p className="text-xl font-bold text-primary">
+                      R${(data.receita / 1000).toFixed(1)}k
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-card/50 p-3">
+                    <span className="text-xs text-muted-foreground">Despesa</span>
+                    <p className="text-xl font-bold text-alert-critical">
+                      R${(data.despesa / 1000).toFixed(1)}k
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-card/50 p-3">
+                    <span className="text-xs text-muted-foreground">Saldo</span>
+                    <p className="text-xl font-bold">
+                      R${(data.saldo / 1000).toFixed(1)}k
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-card/50 p-3">
+                    <span className="text-xs text-muted-foreground">A Receber</span>
+                    <p className="text-xl font-bold text-alert-info">
+                      R${(data.aReceber / 1000).toFixed(1)}k
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-card/50 p-3">
+                    <span className="text-xs text-muted-foreground">A Pagar</span>
+                    <p className="text-xl font-bold text-alert-critical">
+                      R${(data.aPagar / 1000).toFixed(1)}k
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contas A Receber */}
+                {aReceber.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground">A Receber</h4>
+                    <div className="space-y-2">
+                      {aReceber.map((conta) => (
+                        <div
+                          key={conta.id}
+                          className="flex items-center justify-between rounded-lg bg-card/50 p-3 text-sm"
+                        >
+                          <div>
+                            <p className="font-medium">{conta.descricao}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Venc: {new Date(conta.vencimento).toLocaleDateString("pt-BR")}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold">R${conta.valor.toLocaleString("pt-BR")}</p>
+                            <Badge className={getStatusColor(conta.status)}>
+                              {conta.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </CardContent>
-            </Card>
 
-            {/* A Pagar */}
-            <Card className="border-white/5 bg-card/50 backdrop-blur-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <ArrowDownRight className="h-4 w-4 text-alert-important" />
-                  A Pagar
-                  <Badge variant="secondary" className="ml-auto">
-                    {contasAPagar.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {contasAPagar.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    Nenhuma conta a pagar
-                  </p>
-                ) : (
-                  contasAPagar.map((conta) => (
-                    <ContaItem key={conta.id} conta={conta} />
-                  ))
+                {/* Contas A Pagar */}
+                {aPagar.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground">A Pagar</h4>
+                    <div className="space-y-2">
+                      {aPagar.map((conta) => (
+                        <div
+                          key={conta.id}
+                          className="flex items-center justify-between rounded-lg bg-card/50 p-3 text-sm"
+                        >
+                          <div>
+                            <p className="font-medium">{conta.descricao}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Venc: {new Date(conta.vencimento).toLocaleDateString("pt-BR")}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold">R${conta.valor.toLocaleString("pt-BR")}</p>
+                            <Badge className={getStatusColor(conta.status)}>
+                              {conta.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </section>
+            )
+          })}
         </TabsContent>
-      </Tabs>
-    </div>
-  )
-}
 
-function ContaItem({ conta }: { conta: Conta }) {
-  return (
-    <div className="flex items-center justify-between rounded-lg border border-white/5 bg-black/20 p-3">
-      <div className="flex items-center gap-3">
-        <div className={cn("h-2 w-2 rounded-full", ceoColors[conta.ceo].bg)} />
-        <div>
-          <p className="text-sm font-medium">{conta.descricao}</p>
-          <p className="text-xs text-muted-foreground">
-            Venc: {conta.vencimento}
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <div className="text-right">
-          <p className="text-sm font-bold">R${conta.valor.toLocaleString()}</p>
-          <Badge
-            variant="outline"
-            className={cn("text-[10px]", statusColors[conta.status])}
-          >
-            {conta.status}
-          </Badge>
-        </div>
-        {conta.status === "vencido" && (
-          <AlertCircle className="h-4 w-4 text-alert-critical" />
-        )}
-      </div>
+        {/* Por Dominio - Tabs dinamicas */}
+        {(Object.keys(ceoConfig) as CEO[]).map((ceo) => {
+          const data = financeDataByCEO.find((d) => d.ceo === ceo)!
+          const ceConfig = ceoConfig[ceo]
+          const contasCEO = contas.filter((c) => c.ceo === ceo)
+          const aReceber = contasCEO.filter((c) => c.tipo === "receber")
+          const aPagar = contasCEO.filter((c) => c.tipo === "pagar")
+
+          return (
+            <TabsContent key={ceo} value={ceo} className="space-y-4">
+              {/* Metricas do Dominio */}
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="rounded-lg bg-card/50 p-3">
+                  <span className="text-xs text-muted-foreground">Receita</span>
+                  <p className="text-xl font-bold text-primary">
+                    R${(data.receita / 1000).toFixed(1)}k
+                  </p>
+                </div>
+                <div className="rounded-lg bg-card/50 p-3">
+                  <span className="text-xs text-muted-foreground">Despesa</span>
+                  <p className="text-xl font-bold text-alert-critical">
+                    R${(data.despesa / 1000).toFixed(1)}k
+                  </p>
+                </div>
+                <div className="rounded-lg bg-card/50 p-3">
+                  <span className="text-xs text-muted-foreground">Saldo</span>
+                  <p className="text-xl font-bold">
+                    R${(data.saldo / 1000).toFixed(1)}k
+                  </p>
+                </div>
+                <div className="rounded-lg bg-card/50 p-3">
+                  <span className="text-xs text-muted-foreground">A Receber</span>
+                  <p className="text-xl font-bold text-alert-info">
+                    R${(data.aReceber / 1000).toFixed(1)}k
+                  </p>
+                </div>
+                <div className="rounded-lg bg-card/50 p-3">
+                  <span className="text-xs text-muted-foreground">A Pagar</span>
+                  <p className="text-xl font-bold text-alert-critical">
+                    R${(data.aPagar / 1000).toFixed(1)}k
+                  </p>
+                </div>
+              </div>
+
+              {/* Contas A Receber */}
+              {aReceber.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground">A Receber</h4>
+                  <div className="space-y-2">
+                    {aReceber.map((conta) => (
+                      <div
+                        key={conta.id}
+                        className="flex items-center justify-between rounded-lg bg-card/50 p-3 text-sm"
+                      >
+                        <div>
+                          <p className="font-medium">{conta.descricao}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Venc: {new Date(conta.vencimento).toLocaleDateString("pt-BR")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold">R${conta.valor.toLocaleString("pt-BR")}</p>
+                          <Badge className={getStatusColor(conta.status)}>
+                            {conta.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Contas A Pagar */}
+              {aPagar.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground">A Pagar</h4>
+                  <div className="space-y-2">
+                    {aPagar.map((conta) => (
+                      <div
+                        key={conta.id}
+                        className="flex items-center justify-between rounded-lg bg-card/50 p-3 text-sm"
+                      >
+                        <div>
+                          <p className="font-medium">{conta.descricao}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Venc: {new Date(conta.vencimento).toLocaleDateString("pt-BR")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold">R${conta.valor.toLocaleString("pt-BR")}</p>
+                          <Badge className={getStatusColor(conta.status)}>
+                            {conta.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          )
+        })}
+      </Tabs>
     </div>
   )
 }
